@@ -11,4 +11,18 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) //Identificador único
+  name      String   @db.VarChar(50)      //Nombre del usuario  
+  email     String   @unique              //Correo electrónico
+  createdAt DateTime @default(now())      //Fecha de creación
+  updatedAt DateTime @updatedAt           //Fecha de actualización
+
+
+  assignedTo User[] @relation("UserAssignments") //Relación de uno a muchos
+  assifnedTo User? @relation("UserAssignments", fields: [assignedToId], references: [id])
+  assignedToId String?
 }
