@@ -22,7 +22,8 @@ model User {
   updatedAt DateTime @updatedAt           //Fecha de actualización
 
 
-  assignedTo User[] @relation("UserAssignments") //Relación de uno a muchos
-  assifnedTo User? @relation("UserAssignments", fields: [assignedToId], references: [id])
-  assignedToId String?
+  assignedUsers User[] @relation("UserAssignments") //Relación de uno a muchos
+  
+  assignedTo User? @relation("UserAssignments", fields: [assignedToId], references: [id]) //Relación de uno a uno
+  assignedToId String? @db.Uuid //Clave que almacena el id de usuario asignado
 }
