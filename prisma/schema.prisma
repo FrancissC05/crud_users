@@ -15,15 +15,30 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid()) //Identificador único
+  id        Int      @id @default(autoincrement()) //Identificador único
   name      String   @db.VarChar(50)      //Nombre del usuario  
   email     String   @unique              //Correo electrónico
   createdAt DateTime @default(now())      //Fecha de creación
   updatedAt DateTime @updatedAt           //Fecha de actualización
 
+  tickets   Ticket[]
+}
 
-  assignedUsers User[] @relation("UserAssignments") //Relación de uno a muchos
-  
-  assignedTo User? @relation("UserAssignments", fields: [assignedToId], references: [id]) //Relación de uno a uno
-  assignedToId String? @db.Uuid //Clave que almacena el id de usuario asignado
+model Ticket {
+  id          String   @id @default(uuid()) //Identificador único
+  title       String   @db.VarChar(50)      //Título del ticket
+  description String   @db.Text             //Descripción del ticket
+  status      Status   @default(TODO)       //Estado del ticket
+  assignedTo     Int                        //Usuario asignado
+  createdAt   DateTime @default(now())      //Fecha de creación
+  updatedAt   DateTime @updatedAt           //Fecha de actualización
+
+  user        User     @relation(fields: [assignedTo], references: [id], onDelete: Cascade) //Relación de uno a muchos
+}
+
+//Enumeración de los estados de los tickets
+enum Status {
+  TODO
+  IN_PROGRESS
+  DONE
 }
