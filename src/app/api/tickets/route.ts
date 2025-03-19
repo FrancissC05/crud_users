@@ -9,7 +9,7 @@ export async function GET() {
                 title: true,
                 description: true,
                 status: true,
-                user: {
+                assignedTo: {
                     select: {
                         id: true,
                         name: true
@@ -32,7 +32,7 @@ export async function POST(request: any) {
 
         if (!title || !description || /*!status ||*/ !assignedTo) {
             return NextResponse.json(
-                {error: "Title, description, status and assignedTo are required"}, 
+                {error: "Title, description and assignedTo are required"}, 
                 {status: 400}
             );
         }
@@ -53,7 +53,7 @@ export async function POST(request: any) {
                 title, 
                 description, 
                 status,
-                assignedTo
+                userId: assignedTo
             }
         });  
         return NextResponse.json({message: "Ticket created succesfully",ticket});

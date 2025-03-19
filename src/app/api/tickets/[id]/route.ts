@@ -11,8 +11,12 @@ export async function GET(_:any, {params}: Params) {
 
         const ticket = await prisma.ticket.findUnique({
             where: {id},
-            include: {
-                user: {
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                status: true,
+                assignedTo: {
                     select: {
                         id: true,
                         name: true,
