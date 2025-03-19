@@ -1,13 +1,13 @@
 import { prisma } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 interface Params {
-    id: string;
+    params: Promise<{id: string}>;
 }
 
-export async function GET(_: any, {params}: {params: Params}) {
+export async function GET(_:any, {params}: Params) {
     try {
-        const {id} = params;
+        const {id} = await params;
         const userId = parseInt(id, 10);
         
         if (isNaN(userId)) {
