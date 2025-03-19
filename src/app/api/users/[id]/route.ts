@@ -8,8 +8,24 @@ interface Params {
 export async function GET(_: any, {params}: {params: Params}) {
     try {
         const {id} = params;
+        const userId = parseInt(id, 10);
+        
+        if (isNaN(userId)) {
+            return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+        }
+
         const user = await prisma.user.findUnique({
-            where: { id }
+            where: {id: userId },
+            include: {
+                tickets: {
+                    select: {
+                        id: true,
+                        title: true,
+                        status: true,
+                        description: true
+                    }
+                }
+            }
             
         });
 
