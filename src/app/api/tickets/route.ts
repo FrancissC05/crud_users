@@ -12,7 +12,8 @@ export async function GET() {
                 assignedTo: {
                     select: {
                         id: true,
-                        name: true
+                        name: true,
+                        email: true
                 }
                 }
             }
