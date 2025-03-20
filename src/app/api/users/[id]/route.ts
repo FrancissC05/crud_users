@@ -78,3 +78,33 @@ export async function PUT(request: NextRequest, {params}: Params) {
         return NextResponse.json({error: error.message}, {status: 500});
     }
 }
+
+export async function DELETE(_: NextRequest, {params}: Params) {
+    try {
+        const {id} = await params;
+
+        const userId = parseInt(id, 10);
+        
+        if (isNaN(userId)) {
+            return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+        }
+
+        const existingUser = await prisma.user.findUnique({
+            where: { id: userId },
+        });
+
+        if (!existingUser) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        const user = await prisma.user.delete({
+            where: {id: userId }
+        });
+
+        return NextResponse.json({message: "User deleted successfully",user});
+
+    } catch (error: any) {
+
+        return NextResponse.json({error: error.message}, {status: 500});
+    }
+}
