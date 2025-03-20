@@ -85,3 +85,31 @@ export async function PUT(request: NextRequest, {params}: Params) {
         );
     }
 }
+
+export async function DELETE(_: NextRequest, {params}: Params) {
+    try {
+        const {id} = await params;
+
+        const existingTicket = await prisma.ticket.findUnique({
+            where: {id}
+        });
+
+        if (!existingTicket) {
+            return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
+        }
+            await prisma.ticket.delete({
+            where: {
+                id
+            }
+        });
+        
+        return NextResponse.json({message: "Ticket deleted succesfully"});
+
+    } catch (error: any) {
+
+        return NextResponse.json(
+            {error: error.message}, 
+            {status: 500}
+        );
+    }
+}
