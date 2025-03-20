@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
+import { ticketSchema } from "@/lib/schemas/ticket.schema";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 interface Params {
     params: Promise<{id: string}>;
@@ -46,6 +48,8 @@ export async function PUT(request: NextRequest, {params}: Params) {
         const {id} = await params;
         const body = await request.json();
 
+        const {title,description,status,assignedTo} = ticketSchema.parse(body);
+
         const existingTicket = await prisma.ticket.findUnique({
             where: {id}
         });
@@ -56,11 +60,11 @@ export async function PUT(request: NextRequest, {params}: Params) {
 
         const ticket = await prisma.ticket.update({
             data: {
-                title: body.title,
-                description: body.description,
-                status: body.status,
+                title,
+                description,
+                status,
                 assignedTo: {
-                    connect: {id: body.assignedTo}
+                    connect: {id: assignedTo}
                 }
             }, 
             where: {id}
@@ -70,6 +74,11 @@ export async function PUT(request: NextRequest, {params}: Params) {
         return NextResponse.json({message: "Ticket updated succesfully",ticket});
 
     } catch (error: any) {
+
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({error: error.errors},{status: 400});
+        }
+
         return NextResponse.json(
             {error: error.message}, 
             {status: 500}

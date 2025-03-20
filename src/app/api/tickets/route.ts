@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
+import { ticketSchema } from "@/lib/schemas/ticket.schema";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 export async function GET() {
     try {
@@ -29,14 +31,9 @@ export async function GET() {
 
 export async function POST(request: any) {
     try {
-        const {title,description,status,assignedTo} = await request.json();
+        const body = await request.json();
 
-        if (!title || !description || /*!status ||*/ !assignedTo) {
-            return NextResponse.json(
-                {error: "Title, description and assignedTo are required"}, 
-                {status: 400}
-            );
-        }
+        const {title,description,status,assignedTo} = ticketSchema.parse(body);
 
         const user = await prisma.user.findUnique({
             where: { id: assignedTo }
@@ -60,6 +57,11 @@ export async function POST(request: any) {
         return NextResponse.json({message: "Ticket created succesfully",ticket});
 
     } catch (error: any) {
+
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({error: error.errors},{status: 400});
+        }
+
         return NextResponse.json(
             {error: error.message}, 
             {status: 500}
