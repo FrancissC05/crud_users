@@ -42,3 +42,33 @@ export async function GET(_:any, {params}: Params) {
         );
     }
 }
+
+export async function PUT(request: NextRequest, {params}: Params) {
+    try {
+        const {id} = await params;
+        
+        const body = await request.json();
+
+        const userId = parseInt(id, 10);
+        
+        if (isNaN(userId)) {
+            return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+        }
+
+        const user = await prisma.user.update({
+            data : {
+                name: body.name,
+                email: body.email
+            },
+            where: {id: userId }
+        });
+
+        return NextResponse.json(user);
+
+    } catch (error: any) {
+        return NextResponse.json(
+            {error: error.message}, 
+            {status: 500}
+        );
+    }
+}
