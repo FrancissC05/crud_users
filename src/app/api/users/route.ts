@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
+import { userSchema } from "@/lib/schemas/user.schema";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 export async function GET() {
     try {
@@ -29,18 +31,11 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
     try {
-        const {name,email} = await request.json();
+        const body = await request.json();
 
-        if (!name || !email) {
-            return NextResponse.json(
-                {error: "Name and email are required"}, 
-                {status: 400}
-            );
-        }
+        const {name, email} = userSchema.parse(body);
 
-        const existingUser = await prisma.user.findUnique({
-            where: { email }
-        });
+        const existingUser = await prisma.user.findUnique({where: { email }});
 
         if (existingUser) {
             return NextResponse.json(
@@ -55,6 +50,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({message: "User created succesfully",users});
 
     } catch (error: any) {
+
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({error: error.errors},{status: 400});
+        }
+
         return NextResponse.json(
             {error: error.message}, 
             {status: 500}
