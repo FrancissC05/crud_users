@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
+import { userSchema } from "@/lib/schemas/user.schema";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 interface Params {
     params: Promise<{id: string}>;
@@ -49,6 +51,8 @@ export async function PUT(request: NextRequest, {params}: Params) {
         
         const body = await request.json();
 
+        const {name, email} = userSchema.parse(body);
+
         const userId = parseInt(id, 10);
         
         if (isNaN(userId)) {
@@ -57,18 +61,20 @@ export async function PUT(request: NextRequest, {params}: Params) {
 
         const user = await prisma.user.update({
             data : {
-                name: body.name,
-                email: body.email
+                name,
+                email
             },
             where: {id: userId }
         });
 
-        return NextResponse.json(user);
+        return NextResponse.json({message: "User updated successfully",user});
 
     } catch (error: any) {
-        return NextResponse.json(
-            {error: error.message}, 
-            {status: 500}
-        );
+
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({error: error.errors},{status: 400});
+        }
+
+        return NextResponse.json({error: error.message}, {status: 500});
     }
 }
