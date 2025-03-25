@@ -9,36 +9,27 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model User {
   id        Int      @id @default(autoincrement()) //Identificador único
-  name      String   @db.VarChar(50)      //Nombre del usuario  
-  email     String   @unique              //Correo electrónico
-  createdAt DateTime @default(now())      //Fecha de creación
-  updatedAt DateTime @updatedAt           //Fecha de actualización
-
-  tickets   Ticket[]
+  firstName String   @db.VarChar(50)               //Nombre del usuario  
+  lastName  String   @db.VarChar(50)               //Correo electrónico
+  email     String   @unique                       //Correo electrónico
+  username  String   @unique @db.VarChar(20)       //Nombre de usuario
+  password  String                                 //Contraseña
+  isActive  Boolean  @default(true)                //Estado del usuario
+  createdAt DateTime @default(now())               //Fecha de creación
+  updatedAt DateTime @updatedAt                    //Fecha de actualización
+  
+  roles     Role[]   @relation("UserRoles")        //Roles del usuario
 }
 
-model Ticket {
-  id          String   @id @default(uuid()) //Identificador único
-  title       String   @db.VarChar(50)      //Título del ticket
-  description String   @db.Text             //Descripción del ticket
-  status      Status   @default(TODO)       //Estado del ticket
-  userId     Int                            //Usuario asignado
-  createdAt   DateTime @default(now())      //Fecha de creación
-  updatedAt   DateTime @updatedAt           //Fecha de actualización
-
-  assignedTo        User     @relation(fields: [userId], references: [id], onDelete: Cascade) //Relación de uno a muchos
-}
-
-//Enumeración de los estados de los tickets
-enum Status {
-  TODO
-  IN_PROGRESS
-  DONE
+model Role {
+  id    Int    @id @default(autoincrement())       //Identificador único
+  name  String @unique                             //Nombre del rol
+  users User[] @relation("UserRoles")              //Usuarios con este rol
 }
